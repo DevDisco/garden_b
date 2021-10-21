@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+	Tuin aanpassen
+	{{garden.address}}
+{% endblock %}
+{% block body %}
+	{{form_start(form)}}
+	{{form_widget(form)}}
+	{{form_end(form)}}
+	<hr/>
+	<a href="/">Terug</a>
+
+{% endblock %}

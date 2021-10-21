@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+	{{garden.address}}
+
+{% endblock %}
+{% block body %}
+	<h1>{{garden.address}}</h1>
+	<p>{{garden.intro|nl2br}}</p>
+	<p>{{garden.description|nl2br}}</p>
+	<p>Postcode:
+		{{garden.zip}}
+		{{garden.municipality}}</p>
+	<p>Oppervlak tuin:
+		{{garden.size}}
+		m&#178;</p>
+	<p>Bouwjaar huis:
+		{{garden.anno}}</p>
+
+	<hr/>
+	<a href="/">Terug</a>
+
+{% endblock %}

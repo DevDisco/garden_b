@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+	Opentuinendag Westzaan
+{% endblock %}
+{% block body %}
+	<h1>Tuinen</h1>
+	{% if gardens %}
+		<table id="gardens" class="table table-striped">
+			<thead>
+				<tr>
+					<th>Adres</th>
+					<th>Opties</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for garden in gardens %}
+					<tr>
+						<td>{{ garden.address }}</td>
+						<td>
+							<a href="/garden/{{ garden.id }}" class="btn btn-dark">Tonen</a>
+							<a href="/garden/edit/{{ garden.id }}" class="btn btn-light">Aanpassen</a>
+							<a href="#" class="btn btn-danger delete-garden" data-id="{{ garden.id }}">Verwijderen</a>
+						</td>
+					</tr>
+				</td>
+			</tbody>
+		</tr>
+	{% endfor %}
+</tbody></table>{% else %}<p>No gardens to display.</p>{% endif %}{% endblock %}{% block javascripts %}<script src="/js/main.js"></script>{% endblock %}
