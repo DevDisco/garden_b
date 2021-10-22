@@ -13,7 +13,7 @@ class SecurityController extends AbstractController
     /**
      * @Route("/login", name="login")
      */
-    public function login(Request $request, AuthenticationUtils $utils): Response
+    public function login(AuthenticationUtils $utils): Response
     {
         $error = $utils->getLastAuthenticationError();
         $lastUsername = $utils->getLastUsername();
@@ -28,6 +28,6 @@ class SecurityController extends AbstractController
      */
     public function logout(): Response
     {
-        return $this->render('$0.html.twig', []);
+        return $this->render('index.html.twig', []);
     }
 }

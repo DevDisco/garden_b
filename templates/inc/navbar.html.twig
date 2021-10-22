@@ -4,15 +4,19 @@
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mobile-nav">
 			<span class="navbar-toggle-icon"></span>
 		</button>
-
 		<div class="collapse navbar-collapse" id="mobile-nav">
 			<ul class="navbar-nav ml-auto">
-				<li class="nav-item">
-					<a href="/" class="nav-link">Home</a>
-				</li>
-				<li class="nav-item">
-					<a href="/garden/new" class="nav-link">Nieuwe Tuin</a>
-				</li>
+				{% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+					<li class="nav-item">
+						<a href="/" class="nav-link">Home</a>
+					</li>
+					<li class="nav-item">
+						<a href="/garden/new" class="nav-link">Nieuwe Tuin</a>
+					</li>
+					<li class="nav-item">
+						<a href="/logout" class="nav-link">Logout</a>
+					</li>
+				{% endif %}
 			</ul>
 		</div>
 	</div>

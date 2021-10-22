@@ -4,27 +4,31 @@
 	Opentuinendag Westzaan
 {% endblock %}
 {% block body %}
-	<h1>Tuinen</h1>
-	{% if gardens %}
-		<table id="gardens" class="table table-striped">
-			<thead>
+<h1>Tuinen toevoegen, verwijderen of bewerken</h1>
+{% if gardens %}
+	<table id="gardens" class="table table-striped">
+		<thead>
+			<tr>
+				<th>Adres</th>
+
+				<th>&nbsp;</th>
+
+
+			</tr>
+		</thead>
+		<tbody>
+			{% for garden in gardens %}
 				<tr>
-					<th>Adres</th>
-					<th>Opties</th>
+					<td>{{ garden.address }}</td>
+					<td class="text-right">
+
+						<a href="/garden/{{ garden.id }}" class="btn btn-primary">Tonen</a>
+						<a href="/garden/edit/{{ garden.id }}" class="btn btn-primary">Aanpassen</a>
+
+						<a href="#" class="btn btn-danger delete-garden" data-id="{{ garden.id }}">Verwijderen</a>
+					</td>
 				</tr>
-			</thead>
-			<tbody>
-				{% for garden in gardens %}
-					<tr>
-						<td>{{ garden.address }}</td>
-						<td>
-							<a href="/garden/{{ garden.id }}" class="btn btn-dark">Tonen</a>
-							<a href="/garden/edit/{{ garden.id }}" class="btn btn-light">Aanpassen</a>
-							<a href="#" class="btn btn-danger delete-garden" data-id="{{ garden.id }}">Verwijderen</a>
-						</td>
-					</tr>
-				</td>
-			</tbody>
-		</tr>
-	{% endfor %}
-</tbody></table>{% else %}<p>No gardens to display.</p>{% endif %}{% endblock %}{% block javascripts %}<script src="/js/main.js"></script>{% endblock %}
+			</tr>
+		</tbody>
+	</td>
+</tbody></tr>{% endfor %}</tbody></table>{% else %}<p>No gardens to display.</p>{% endif %}{% endblock %}{% block javascripts %}<script src="/js/main.js"></script>{% endblock %}
