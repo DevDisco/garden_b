@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-	Tuin aanpassen
+	Tuinfoto's aanpassen
 	{{garden.address}}
 {% endblock %}
 {% block body %}
@@ -9,14 +9,7 @@
 	{{form_widget(form)}}
 	{{form_end(form)}}
 	<hr/>
-	{% for image in images %}
-		<img class="img-fluid" src="{{asset(image)}}"/>
+	<a href="/garden/edit/{{garden.id}}">Terug</a>
 
-	{% else %}
-		<em>No image found.</em>
-	{% endfor %}
-	<hr/>
-
-	<a href="/">Terug</a>
 
 {% endblock %}
