@@ -4,8 +4,10 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
-  uploads_folder: "uploads"
-  uploads_path: "%kernel.project_dir%/public/uploads"
+  # the relative path that twig needs to get to the proper directory
+  uploads_url: "../../../tuinendag_react2/public/uploads"
+  # the filesystem path that's used for uploading in the controller
+  uploads_dir: "%kernel.project_dir%/../../tuinendag_react2/public/uploads"
 
 services:
   # default configuration for services in *this* file

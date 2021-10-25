@@ -12,6 +12,7 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 
@@ -41,8 +42,8 @@ class GardenController extends AbstractController
             ->add('municipality', TextType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Plaatsnaam'])
             ->add('intro', TextareaType::class, ['required' => false, 'attr' => ['class' => 'form-control'], 'label' => 'Korte tekst voor overzichtspagina'])
             ->add('description', TextareaType::class, ['required' => false, 'attr' => ['class' => 'form-control'], 'label' => 'Lange tekst voor beschrijving tuin'])
-            ->add('size', TextType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Oppervlakte'])
-            ->add('anno', TextType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Bouwjaar of -eeuw huis'])         
+            ->add('size', NumberType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Oppervlakte'])
+            ->add('anno', TextType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Bouwjaar of -eeuw huis'])
             ->add('save', SubmitType::class, ['label' => 'Klaar', 'attr' => ['class' => 'btn btn-primary mt-3']])
             ->getForm();
 
@@ -54,7 +55,7 @@ class GardenController extends AbstractController
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($garden);
             $entityManager->flush();
-            
+
             return $this->redirectToRoute("garden_list");
         }
 
@@ -76,10 +77,10 @@ class GardenController extends AbstractController
             ->add('municipality', TextType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Plaatsnaam'])
             ->add('intro', TextareaType::class, ['required' => false, 'attr' => ['class' => 'form-control'], 'label' => 'Korte tekst voor overzichtspagina'])
             ->add('description', TextareaType::class, ['required' => false, 'attr' => ['class' => 'form-control'], 'label' => 'Lange tekst voor beschrijving tuin'])
-            ->add('size', TextType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Oppervlakte'])
+            ->add('size', NumberType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Oppervlakte'])
             ->add('anno', TextType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Bouwjaar of -eeuw huis'])
             ->add('save', SubmitType::class, ['label' => 'Aanpassen', 'attr' => ['class' => 'btn btn-primary mt-3']])
-        ->getForm();
+            ->getForm();
 
         $form->handleRequest($request);
 
@@ -90,11 +91,9 @@ class GardenController extends AbstractController
             return $this->redirectToRoute("garden_list");
         }
 
-        $image_list = $this->getImages($id);
-        //trhow into twig
-        
 
-        return $this->render('gardens/edit.html.twig', ['form' => $form->createView(), 'garden' => $garden, 'images' => $image_list]);
+
+        return $this->render('gardens/edit.html.twig', ['form' => $form->createView(), 'garden' => $garden]);
     }
 
 
@@ -115,15 +114,15 @@ class GardenController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            
-            $file = $request->files->get('form')['image'];
-            $uploads_path = $this->getParameter('uploads_path')."/". $id;
-            $file->move($uploads_path,$file->getClientOriginalName() );
 
-            return $this->redirectToRoute("edit_garden", ['id'=>$id]);
+            $file = $request->files->get('form')['image'];
+            $uploads_dir = $this->getParameter('uploads_dir') . "/" . $id;
+            $file->move($uploads_dir, $file->getClientOriginalName());
         }
 
-        return $this->render('gardens/upload.html.twig', ['form' => $form->createView(), 'garden' => $garden]);
+        $image_list = $this->getImages($id);
+
+        return $this->render('gardens/upload.html.twig', ['form' => $form->createView(), 'garden' => $garden, 'images' => $image_list]);
     }
 
     /**
@@ -133,14 +132,35 @@ class GardenController extends AbstractController
     public function delete(Request $request, $id)
     {
         $garden = $this->getDoctrine()->getRepository(Garden::class)->find($id);
-
-
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($garden);
         $entityManager->flush();
-        
+
         $response = new Response();
         $response->send();
+    }
+
+
+    /**
+     * @Route("/garden/remove/{id}/{file}", name="image_delete")
+     * @Method({"DELETE"})
+     */
+    public function remove(Request $request, $id, $file)
+    {
+        print $file;
+        $dir = $this->getParameter('uploads_url') . "/" . $id . "/";
+
+        //just to be sure, dir should exist
+        if (is_dir($dir)) {
+
+            $finder = new Finder();
+            $finder->date($file);
+
+            /** @var SplFileInfo $file */
+            foreach ($finder as $file) {
+                print $file->getFilename();
+            }
+        }
     }
 
     /**
@@ -152,19 +172,23 @@ class GardenController extends AbstractController
 
         return $this->render('gardens/show.html.twig', ['garden' => $garden]);
     }
-    
-    //http://www.inanzzz.com/index.php/post/kgcu/uploading-images-to-a-private-directory-and-serving-them-in-twig-template
 
+    //shows all the images in the upload folder belonging to garden #id
     private function getImages($id)
     {
         $images = [];
-        $dir = $this->getParameter('uploads_folder')."/".$id."/";
-        $finder = new Finder($this->getParameter('uploads_path') . "/" . $id);
-        $finder->files()->in($dir);
+        $dir = $this->getParameter('uploads_url') . "/" . $id . "/";
 
-        /** @var SplFileInfo $file */
-        foreach ($finder as $file) {
-            $images[] = $dir.$file->getFilename();
+        //this dir doesn't exists before the first image is uploaded
+        if (is_dir($dir)) {
+
+            $finder = new Finder();
+            $finder->files()->in($dir);
+
+            /** @var SplFileInfo $file */
+            foreach ($finder as $file) {
+                $images[] = array("url" => $dir . $file->getFilename(), "file" => $file->getMTime());
+            }
         }
 
         return $images;

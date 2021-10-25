@@ -48,7 +48,7 @@ class Garden
     private $size;
 
     /**
-     * @ORM\Column(type="smallint")
+     * @ORM\Column(type="string", length=32)
      */
     private $anno;
 
@@ -129,12 +129,12 @@ class Garden
         return $this;
     }
 
-    public function getAnno(): ?int
+    public function getAnno(): ?string
     {
         return $this->anno;
     }
 
-    public function setAnno(int $anno): self
+    public function setAnno(string $anno): self
     {
         $this->anno = $anno;
 

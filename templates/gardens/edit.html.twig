@@ -9,14 +9,7 @@
 	{{form_widget(form)}}
 	{{form_end(form)}}
 	<hr/>
-	{% for image in images %}
-		<img class="img-fluid" src="{{asset(image)}}"/>
 
-	{% else %}
-		<em>No image found.</em>
-	{% endfor %}
-	<hr/>
-
-	<a href="/">Terug</a>
+	<a href="../../">Terug</a>
 
 {% endblock %}

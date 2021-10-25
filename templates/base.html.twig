@@ -8,7 +8,9 @@
 			{% block title %}Welcome!
 			{% endblock %}
 		</title>
-		<link rel="stylesheet" href="https://bootswatch.com/4/minty/bootstrap.min.css"> {% block stylesheets %}{% endblock %}
+		<link rel="stylesheet" href="https://bootswatch.com/4/minty/bootstrap.min.css">
+		<link rel="stylesheet" href="{{ app.request.baseUrl }}/css/overrides.css"> {% block stylesheets %}{% endblock %}
+
 
 		</head>
 		<body>

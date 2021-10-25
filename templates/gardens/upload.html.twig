@@ -5,11 +5,35 @@
 	{{garden.address}}
 {% endblock %}
 {% block body %}
-	{{form_start(form)}}
-	{{form_widget(form)}}
-	{{form_end(form)}}
-	<hr/>
-	<a href="/garden/edit/{{garden.id}}">Terug</a>
-
-
+	<h1>
+		Foto's
+		{{garden.address}}
+	</h1>
+	{% if images %}
+		<table id="images" class="table table-striped">
+			<thead>
+				<tr>
+					<th>Foto</th>
+					<th>&nbsp;</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for image in images %}
+					<tr>
+						<td><img class="garden" src="{{asset(image['url'])}}"/></td>
+						<td class="text-right">
+							<a href="garden/{{ garden.id }}" class="btn btn-primary">Ware grootte</a>
+							<a href="#" class="btn btn-danger delete-image" data-id="{{ garden.id }}" data-file="{{ image['file']}}">Verwijderen</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<p>Geen foto's aanwezig.</p>
+	{% endif %}
+	{{form_start(form)}}{{form_widget(form)}}{{form_end(form)}}<hr/><a href="../../">Terug</a>
+{% endblock %}
+{% block javascripts %}
+	<script src="{{ app.request.baseUrl }}/js/main.js"></script>
 {% endblock %}
