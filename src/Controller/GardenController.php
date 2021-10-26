@@ -42,7 +42,7 @@ class GardenController extends AbstractController
             ->add('municipality', TextType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Plaatsnaam'])
             ->add('intro', TextareaType::class, ['required' => false, 'attr' => ['class' => 'form-control'], 'label' => 'Korte tekst voor overzichtspagina'])
             ->add('description', TextareaType::class, ['required' => false, 'attr' => ['class' => 'form-control'], 'label' => 'Lange tekst voor beschrijving tuin'])
-            ->add('size', NumberType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Oppervlakte'])
+            ->add('size', NumberType::class, ['html5'=>true,'attr' => ['class' => 'form-control'], 'label' => 'Oppervlakte'])
             ->add('anno', TextType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Bouwjaar of -eeuw huis'])
             ->add('save', SubmitType::class, ['label' => 'Klaar', 'attr' => ['class' => 'btn btn-primary mt-3']])
             ->getForm();
@@ -77,7 +77,7 @@ class GardenController extends AbstractController
             ->add('municipality', TextType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Plaatsnaam'])
             ->add('intro', TextareaType::class, ['required' => false, 'attr' => ['class' => 'form-control'], 'label' => 'Korte tekst voor overzichtspagina'])
             ->add('description', TextareaType::class, ['required' => false, 'attr' => ['class' => 'form-control'], 'label' => 'Lange tekst voor beschrijving tuin'])
-            ->add('size', NumberType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Oppervlakte'])
+            ->add('size', NumberType::class, ['html5' => true, 'attr' => ['class' => 'form-control'], 'label' => 'Oppervlakte'])
             ->add('anno', TextType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Bouwjaar of -eeuw huis'])
             ->add('save', SubmitType::class, ['label' => 'Aanpassen', 'attr' => ['class' => 'btn btn-primary mt-3']])
             ->getForm();
@@ -129,7 +129,7 @@ class GardenController extends AbstractController
      * @Route("/garden/delete/{id}", name="garden_delete")
      * @Method({"DELETE"})
      */
-    public function delete(Request $request, $id)
+    public function delete($id)
     {
         $garden = $this->getDoctrine()->getRepository(Garden::class)->find($id);
         $entityManager = $this->getDoctrine()->getManager();
@@ -142,25 +142,35 @@ class GardenController extends AbstractController
 
 
     /**
-     * @Route("/garden/remove/{id}/{file}", name="image_delete")
+     * @Route("/garden/remove/{id}/{timestamp}", name="image_delete")
      * @Method({"DELETE"})
      */
-    public function remove(Request $request, $id, $file)
+    public function remove($id, $timestamp)
     {
-        print $file;
+        $date = date('Y-m-d H:i:s', $timestamp);
         $dir = $this->getParameter('uploads_url') . "/" . $id . "/";
 
         //just to be sure, dir should exist
         if (is_dir($dir)) {
 
             $finder = new Finder();
-            $finder->date($file);
+            $finder->in($dir)->date($date);
 
             /** @var SplFileInfo $file */
             foreach ($finder as $file) {
-                print $file->getFilename();
+
+                print $path = $dir . $file->getFilename();
+
+                if (is_file($path)) {
+
+                    unlink($path);
+                }
             }
         }
+
+        $response = new Response();
+        $response->send();
+        return $response;
     }
 
     /**
@@ -169,8 +179,9 @@ class GardenController extends AbstractController
     public function show($id): Response
     {
         $garden = $this->getDoctrine()->getRepository(Garden::class)->find($id);
+        $image_list = $this->getImages($id);
 
-        return $this->render('gardens/show.html.twig', ['garden' => $garden]);
+        return $this->render('gardens/show.html.twig', ['garden' =>$garden, 'images' => $image_list]);
     }
 
     //shows all the images in the upload folder belonging to garden #id

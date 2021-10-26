@@ -6,7 +6,7 @@
 {% endblock %}
 {% block body %}
 	<h1>{{garden.address}}</h1>
-	<p>{{garden.intro|nl2br}}</p>
+	<p class='lead'>{{garden.intro|nl2br}}</p>
 	<p>{{garden.description|nl2br}}</p>
 	<p>Postcode:
 		{{garden.zip}}
@@ -18,6 +18,18 @@
 		{{garden.anno}}</p>
 
 	<hr/>
-	<a href="../">Terug</a>
 
+	{% if images %}
+
+		{% for image in images %}
+			<img class="standard m-2" src="{{asset(image['url'])}}"/>
+
+		{% endfor %}
+
+	{% else %}
+		<p>[Nog geen foto's aanwezig]</p>
+	{% endif %}
+	<hr/>
+
+	<a href="../">Terug</a>
 {% endblock %}

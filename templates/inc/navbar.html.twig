@@ -9,10 +9,12 @@
 			<ul class="navbar-nav ml-auto">
 				{% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
 					<li class="nav-item">
-						<a href="garden/new" class="nav-link">Nieuwe Tuin</a>
+						<a href="{{ app.request.baseUrl }}/garden/new" class="nav-link">Nieuwe Tuin</a>
+
 					</li>
 					<li class="nav-item">
-						<a href="logout" class="nav-link">Logout</a>
+						<a href="{{ app.request.baseUrl }}/logout" class="nav-link">Logout</a>
+
 					</li>
 				{% endif %}
 			</ul>

@@ -1,4 +1,9 @@
-img.garden {
+img.small {
   width: 320px;
   height: 160px;
+}
+
+img.standard {
+  max-width: 640px;
+  width: 100%;
 }
