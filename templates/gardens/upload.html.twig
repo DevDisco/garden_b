@@ -14,9 +14,12 @@
 			<tbody>
 				{% for image in images %}
 					<tr>
-						<td><img class="standard" src="{{asset(image['url'])}}"/></td>
+						<td><img class="standard" src="{{asset(image['url'])}}{{asset(image['file'])}}"/></td>
+
 						<td>
-							<a href="#" class="btn btn-danger delete-image" data-id="{{ garden.id }}" data-file="{{ image['file']}}">Verwijderen</a>
+							<a href="#" class="btn btn-danger delete-image" data-id="{{ garden.id }}" data-file="{{ image['file']}}" " data-date=" {{ image['date']}} ">Verwijderen</a>
+
+
 						</td>
 					</tr>
 				{% endfor %}

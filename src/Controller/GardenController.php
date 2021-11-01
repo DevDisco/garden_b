@@ -14,10 +14,16 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-
+use App\Logger;
 
 class GardenController extends AbstractController
 {
+
+
+    public function __construct(private Logger $logger)
+    {
+    }
+
     /**
      * @Route("/", name="garden_list")
      * @Method({"GET"})
@@ -42,7 +48,7 @@ class GardenController extends AbstractController
             ->add('municipality', TextType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Plaatsnaam'])
             ->add('intro', TextareaType::class, ['required' => false, 'attr' => ['class' => 'form-control'], 'label' => 'Korte tekst voor overzichtspagina'])
             ->add('description', TextareaType::class, ['required' => false, 'attr' => ['class' => 'form-control'], 'label' => 'Lange tekst voor beschrijving tuin'])
-            ->add('size', NumberType::class, ['html5'=>true,'attr' => ['class' => 'form-control'], 'label' => 'Oppervlakte'])
+            ->add('size', NumberType::class, ['html5' => true, 'attr' => ['class' => 'form-control'], 'label' => 'Oppervlakte'])
             ->add('anno', TextType::class, ['attr' => ['class' => 'form-control'], 'label' => 'Bouwjaar of -eeuw huis'])
             ->add('save', SubmitType::class, ['label' => 'Klaar', 'attr' => ['class' => 'btn btn-primary mt-3']])
             ->getForm();
@@ -136,41 +142,29 @@ class GardenController extends AbstractController
         $entityManager->remove($garden);
         $entityManager->flush();
 
+        $dir = realpath($this->getParameter('uploads_dir') . "/" . $id);
+        $this->deleteDir($dir);  
+
         $response = new Response();
         $response->send();
     }
 
 
     /**
-     * @Route("/garden/remove/{id}/{timestamp}", name="image_delete")
+     * @Route("/garden/remove/{id}/{filename}/{timestamp}", name="image_delete")
      * @Method({"DELETE"})
      */
-    public function remove($id, $timestamp)
+    public function remove($id,$filename, $timestamp)
     {
-        $date = date('Y-m-d H:i:s', $timestamp);
-        $dir = $this->getParameter('uploads_url') . "/" . $id . "/";
+        $this->logger->emptyLogFile();
+        
+        $dir = realpath($this->getParameter('uploads_dir') . "/" . $id);
+        $this->logger->toLogfile("dir=" . $dir);
 
-        //just to be sure, dir should exist
-        if (is_dir($dir)) {
-
-            $finder = new Finder();
-            $finder->in($dir)->date($date);
-
-            /** @var SplFileInfo $file */
-            foreach ($finder as $file) {
-
-                print $path = $dir . $file->getFilename();
-
-                if (is_file($path)) {
-
-                    unlink($path);
-                }
-            }
-        }
+        $this->deleteFiles($dir, $filename, $timestamp);
 
         $response = new Response();
         $response->send();
-        return $response;
     }
 
     /**
@@ -181,14 +175,15 @@ class GardenController extends AbstractController
         $garden = $this->getDoctrine()->getRepository(Garden::class)->find($id);
         $image_list = $this->getImages($id);
 
-        return $this->render('gardens/show.html.twig', ['garden' =>$garden, 'images' => $image_list]);
+        return $this->render('gardens/show.html.twig', ['garden' => $garden, 'images' => $image_list]);
     }
 
     //shows all the images in the upload folder belonging to garden #id
     private function getImages($id)
     {
         $images = [];
-        $dir = $this->getParameter('uploads_url') . "/" . $id . "/";
+        $dir = $this->getParameter('uploads_dir') . "/" . $id . "/";
+        $url = $this->getParameter('uploads_url') . "/" . $id . "/";
 
         //this dir doesn't exists before the first image is uploaded
         if (is_dir($dir)) {
@@ -198,10 +193,65 @@ class GardenController extends AbstractController
 
             /** @var SplFileInfo $file */
             foreach ($finder as $file) {
-                $images[] = array("url" => $dir . $file->getFilename(), "file" => $file->getMTime());
+                $images[] = array("url" => $url, "file" => $file->getFilename(), "date" => $file->getMTime());
             }
         }
 
         return $images;
+    }
+    
+    //if $filename or $date are not given, this will remove all files from $dir
+    //if $filename and/or $timestamp are given, only files that have the same name 
+    //or creation date will be removed.
+    private function deleteFiles( $dir, $filename="", $timestamp="" ){
+        
+        $is_dir = false;
+
+        //just to be sure, dir should exist
+        if ($is_dir = is_dir($dir)) {
+
+            $finder = new Finder();
+            
+            if ( $filename!=="" && $timestamp!=="" ){
+
+                $date = date('Y-m-d H:i:s', $timestamp);
+                $finder->in($dir)->name($filename)->date($date);
+            }
+            else if ($filename !== "") {
+
+                $finder->in($dir)->name($filename);
+            } 
+            else if ($timestamp !== "") {
+
+                $date = date('Y-m-d H:i:s', $timestamp);
+                $finder->in($dir)->date($date);
+            }
+            else{
+                $finder->in($dir);
+            }
+
+            foreach ($finder as $file) {
+
+                $path = $dir . "\\" . $file->getFilename();
+                $this->logger->toLogfile("path=" . $path);
+
+                if (is_file($path)) {
+                    $result = unlink($path);
+                    $this->logger->toLogfile("result=" . $result);
+                }
+            }
+        }
+        
+        return $is_dir;
+    }
+
+    //calls deleteFiles() and removes $dir 
+    private function deleteDir($dir){
+
+        if ( $this->deleteFiles($dir) ){
+            
+            rmdir($dir);
+        }
+    
     }
 }

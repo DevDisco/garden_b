@@ -6,7 +6,7 @@ if (gardens) {
       if (confirm("sure?")) {
         const id = e.target.getAttribute("data-id");
 
-        fetch(`garden/delete/${id}`, { method: "DELETE" }).then((res) =>
+        fetch(`/garden/delete/${id}`, { method: "DELETE" }).then((res) =>
           window.location.reload()
         );
       }
@@ -19,13 +19,15 @@ const images = document.getElementById("images");
 if (images) {
   images.addEventListener("click", (e) => {
     if (e.target.className === "btn btn-danger delete-image") {
-      if (confirm("sure?")) {
+      if (confirm("Are you really sure that you want to delete this image?")) {
         const id = e.target.getAttribute("data-id");
         const file = e.target.getAttribute("data-file");
+        const date = e.target.getAttribute("data-date");
+        console.log(id, file, date);
 
-        fetch(`../remove/${id}/${file}`, { method: "DELETE" }).then((res) =>
-          window.location.reload()
-        );
+        fetch(`/garden/remove/${id}/${file}/${date}`, {
+          method: "DELETE",
+        }).then((res) => window.location.reload());
       }
     }
   });
